@@ -9,9 +9,9 @@
 
 ## pnpm create next-app@latest
 - npm의 npx 대신 pnpm create 사용
-## pnpm create react-app my-app
+### $ pnpm create react-app my-app
 ### $ cd my-app
-###$ re -rf node_modules package-lock.json
+### $ re -rf node_modules package-lock.json
 ### $ pnpm install
 ### 서버 실행 $ pnpm dev
 
