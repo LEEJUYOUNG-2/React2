@@ -41,10 +41,32 @@
 - path / URL_pattern / Notes
 
 
- 
-| 주차 | 주제 | 내용 |
+## 병렬 및 가로채기 라우팅
+* 슬롯 기반 레이아웃이나 모달 라우팅과 같은 특정 UI 패턴 적합
+* 부모 레이아웃에서 렌더링되는 명명된 슬롯 - @slot사용
+* 인터셉트 패턴 사용 - URL 변경 없이 현재 레이아웃 내에서 다른 경로 렌더링 가능
+* 목록 위에 모달 형태로 상세 보기 표시 사용
+
+| Pattern(docs) | Meanig | 일반적 사용 사례 |
 |:---:|---|---|
-| 1주차 | pnpm | Performant NPM, Node 패키지 관리 |
-| 1주차 | pnpm | `pnpm create next-app@latest` |
-| 1주차 | pnpm | 하드 링크 기반 저장 공간 절약 |
-| 1주차 | pnpm | 패키지 재사용을 통한 빠른 설치 |
+| @folder | 명령된 슬롯 | 사이드바 + 메인 콘텐츠 |
+| ()folder | 동일 레벨 가로채기 | 현재 화면에서 같은 레벨의 다른 페이지를 모달 등으로 표시 |
+| (.)folder | 한 레벨 위에서 가로채기 | 상위 경로의 페이지를 현재 화면에서 다른 UI 형태로 표시 |
+| (..)folder | 두 레벨 위에서 가로채기 | 패키지 재사용을 통한 빠른 설치 |
+| (...)folder | 루트에서 가로채기 | 현재 경로와 관계없이 루트 기준의 페이지를 가로채서 표시 |
+
+## Open Graph Protocol
+* 웹사이트나 페이스북, 인스타, X, 카톡 등 링크 전달할 때 미리보기를 생성하는 프로토콜
+* Open Graph Protocol - 대표적 프로토콜
+
+## Organizing your project 프로젝트 구성
+* next.js - 파일 구성 어디에 배치할지 제약X
+* 프로젝트 체계쩍으로 구성하는데 도움되는 기능
+### component의 계층 구조
+* 특수 파일에 정의된 component = 특정 계층 구조로 렌더링
+- layout.js
+- template.js
+- error.js(React 오류 경계)
+- loading(리액트 서스펜스 경계)
+- not-found.js(React 오류 경계)
+- pags.js or 중첩 layout.js
