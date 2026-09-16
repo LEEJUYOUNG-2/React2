@@ -34,6 +34,17 @@
 * 윈도우의 바로 가기 파일과 비슷
 
 # 3주차
+## Folder and file conventions 폴더 및 파일 규칙
+### 라우팅 그룹 및 비공개 폴더 - Route Groups and private folders
+* 라우트 그룹을 사용 - URL 변경 안 하고 코드 정리 가능
+* 라우팅 되지 않은 파일 = _folder라는 비공개 디렉토리에 저장
+- path / URL_pattern / Notes
 
 
  
+| 주차 | 주제 | 내용 |
+|:---:|---|---|
+| 1주차 | pnpm | Performant NPM, Node 패키지 관리 |
+| 1주차 | pnpm | `pnpm create next-app@latest` |
+| 1주차 | pnpm | 하드 링크 기반 저장 공간 절약 |
+| 1주차 | pnpm | 패키지 재사용을 통한 빠른 설치 |
