@@ -85,4 +85,4 @@
 * 폴더 이름 앞에 %5F(밑줄로 URL 인코딩된 형태)를 접두사로 붙여 밑줄로 시작하는 URL 세크먼트 만들기 가능 - 아스키 코드의 URL-encoding
 
 ## layout template 차이
-* layout - 정적(유지형) template - 동적(초기화형)
+* layout - 정적(유지형) template - 동적(초기화형)d
