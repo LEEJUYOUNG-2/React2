@@ -1,6 +1,25 @@
 # 202230140 이주영
 
 # 4주차
+## Link Component
+href(required)
+```js
+
+```
+* root layout 필수 - html 및 body 포함
+* subpage layout 필수X
+## 중첩 라우트 만들기 
+* 다중 URL 세그먼트로 구성된 라우트
+* /blog/[slug]경로는 세 개의 세그먼트 구성
+1. (Root Segment)
+2. blog(Segment)
+3. [slug] (Leaf Segment)
+
+* [Next.js에서]
+* 폴더는 URL 세그먼트에 매핑되는 경로 세그먼트 정의(폴더가 URL세그먼트가 된다)
+* /blog에 대한 경로를 추가하려면 app 디렉터리에 blog 폴더를 만듦
+* /blog에 공개적으로 엑세스 할 수 있도록 하려면ㄴ page.tsx파일 추가
+
 
 # 3주차
 ## Folder and file conventions 폴더 및 파일 규칙
