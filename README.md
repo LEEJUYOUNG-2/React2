@@ -75,6 +75,25 @@ export default function Posts({ params }: { params: { slug: string } }) {
 - 매개변수 구조({params}); Next.js가 페이지 호출할 때 props 객체로 {params,searchParams, ...}같은 값 넘기는데 여기서 params만 구조 분해로 받음
 - 타입 {params: Promis<{slug: string}>} TypeScript 타입 선언
 - params - promise(비동기 값) 명시
+## Rendering with search params 
+* 페이지에 대한 데이터를 로드하기 위해 검색 매개변수가 필요한 경우(페이지 매김, 데이터베이스에서 필터링)사용
+* 검색 매개변수가 클라이언트에서만 사용되는 경우(props를 통해 이미 로딩된 목록을 필터링하는 경우)사용
+
+
+## searchParams
+```tsx
+/products?category=shoes&page=2
+```
+* category=shoes, page=2 search parameteres.
+
+* next.js의 app Router에서 searchParams는 이렇게
+```tsx
+export default function prudectsPage((searchParams)){
+    return <p>카테고리: {searchParams.category}</p>;
+}
+```
+* searchParams는 컴포넌트의 props로 전달 내부적으로 URLSearchParams처럼 작동
+## 왜 동적 렌더링이 되는가
 
 
 
