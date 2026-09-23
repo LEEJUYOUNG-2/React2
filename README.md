@@ -14,11 +14,69 @@ href(required)
 1. (Root Segment)
 2. blog(Segment)
 3. [slug] (Leaf Segment)
+* 폴더를 계속 중첩하여 중첩된 경로 만들기O
+* 특정 블로그 게시물에 대한 경로를 만들려면 blog 안에 새 [slug] 폴더를 만들고 page 파일을 추가
+* 폴더 이름을 대괄호 [slug]로 묶으면 데이터에서 여러 페이지를 생성하는데 사용된느 동적 경로 세그먼트 생성 - 블로그 게시물, 제품 페이지 등
 
-* [Next.js에서]
+## [Next.js에서]
 * 폴더는 URL 세그먼트에 매핑되는 경로 세그먼트 정의(폴더가 URL세그먼트가 된다)
 * /blog에 대한 경로를 추가하려면 app 디렉터리에 blog 폴더를 만듦
-* /blog에 공개적으로 엑세스 할 수 있도록 하려면ㄴ page.tsx파일 추가
+* /blog에 공개적으로 엑세스 할 수 있도록 하려면 page.tsx파일 추가
+
+## [slug]의 이해
+* slug는 사이트의 특정 페이지를 쉽게 읽을 수 있는 형태로 식별하는 URL의 일부
+* 따라서 데이터에는 slug key가 반드시 있어야 한다
+
+```js
+// dummy data
+
+export const posts = [
+  { slug: "nextjs", title: "Next.js 소개", content: "Next.js는 React 기반의 풀스택 프레임워크입니다." },
+  { slug: "routing", title: "라우팅", content: "App Router 알아보기 - Next.js 13부터 App Router가 도입되었습니다." },
+  { slug: "ssr-ssg", title: "SSR vs SSG", content: "서버사이드 렌더링과 정적 사이트 생성의 차이를 알아봅니다." },
+  { slug: "dynamic-routes", title: "동적 라우팅", content: "Next.js에서 [slug]를 활용한 라우팅 방식입니다." },
+];
+```
+
+* 예를 들어 첫 번째 데이터를 호출하는 경우라면 /blog/nextjs 라고 호출
+* [slug]는 반드시 slug일 필요X / 단, [foo]라고 했다면 데이터에 반드시 foo key(필드)가 있어야함
+
+## 디렉터리 구조
+```text
+app/
+└─ blog/
+   ├─ page.tsx          // 블로그 메인 (목록)
+   └─ [slug]/
+      └─ page.tsx       // 블로그 상세 페이지
+```
+
+```js
+import { posts } from "../posts";
+
+export default function Posts({ params }: { params: { slug: string } }) {
+  const post = posts.find((p) => p.slug === params.slug);
+
+  if (!post) {
+    return <h1>게시글을 찾을 수 없습니다!</h1>;
+  }
+
+  return (
+    <article>
+      <h1>{post.title}</h1>
+      <p>{post.content}</p>
+    </article>
+  );
+}
+```
+
+* 3, 4, 5 라인 의미 설명
+- async function: 함수를 async로 선언 - 내부에서 await 사용가능
+- await 사용이유 - 서버 데이터 읽어 올 때 타임 딜레이에 의한 오류방지
+- 매개변수 구조({params}); Next.js가 페이지 호출할 때 props 객체로 {params,searchParams, ...}같은 값 넘기는데 여기서 params만 구조 분해로 받음
+- 타입 {params: Promis<{slug: string}>} TypeScript 타입 선언
+- params - promise(비동기 값) 명시
+
+
 
 
 # 3주차
