@@ -2,7 +2,7 @@
 
 # 8주차
 
-## Example
+## Exampleㅇ
 
 ### 3-1 client component 사용
 
