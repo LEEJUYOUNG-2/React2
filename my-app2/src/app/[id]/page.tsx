@@ -25,8 +25,9 @@ export default async function PostPage({
       <main>
         <h1>{post.title}</h1>
         {/*...*/}
-        <LikeButton likes={post.likes} />
+        <LikeButton likes={post.likes ?? 0} />
       </main>
     </>
   );
 }
+//<LikeButton likes={post.likes} />
