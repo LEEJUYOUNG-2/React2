@@ -55,6 +55,112 @@ export default function Page() {
 }
 ```
 
+## 라이브러리 작성자를 위한 조언
+
+- 컴포넌트 라이브러리를 만들 때 - 클라이언트 전용 기능에 의존하는 진입점에 "use client" 지시문을 추가
+- 그러면 사용자는 별도의 래퍼를 만들지 않고도 해당 컴포넌트를 서버 컴포넌트에서 가져와 사용 가능
+- 일부 번들러는 "use client" 지시문을 제거 가능 React Wrap Balancer와 Vercel Analytics 저장소에서 esbuild가 이 지시문을 포함하도록 설정하는 예시를 확인 가능
+
+### 환경 변수 노출 예방
+
+- JavaScript 모듈은 server 및 client compoment 모듈 간 공유o
+
+* 실수로 전용 코드를 client로 가져올 수 있음
+
+- 컴포넌트 라이브러리를 만들 때는 클라이언트 전용 기능에 의존하는 진입점에 "use client" 지시문을 추가
+- 그러면 사용자는 별도의 래퍼를 만들지 않고도 해당 컴포넌트를 서버 컴포넌트에서 가져와 사용O
+- 일부 번들러는 "use client" 지시문을 제거할 수 있습니다. React Wrap Balancer와 Vercel Analytics 저장소에서 esbuild가 이 지시문을 포함하도록 설정하는 예시를 확인
+
+```tsx
+import "server-only";
+
+export async function getData() {
+  const res = await fetch("https://external-service.com/data", {
+    headers: {
+      authorization: process.env.API_KEY,
+    },
+  });
+
+  return res.json();
+}
+```
+
+- 이 모듈을 클라이언트 컴포넌트에서 가져오려고 하면 빌드 시 오류가 발생
+
+* client-only 패키지는 window 객체에 접근하는 코드처럼 클라이언트 전용 로직이 포함된 모듈을 표시할 때 사용o
+  - Next.js에서 server-only 또는 client-only 패키지를 설치하는 것은 선택 사항
+  - 다만 린트 규칙에서 해당 패키지가 필요하다고 안내한다면, 경고를 해결하기 위해 설치o
+
+- npm install server-only
+
+## Fetching Data
+
+- 데이터 가져오기 1-1. 서버 컴포넌트
+- 서버컴포넌트에서 데이터를 fetch하는 방법 2가지.
+
+1. fetch API
+2. ORM or DATABASE
+
+- fetch API
+
+* 데이터를 가져오려면 fetch API를 사용하여 컴포넌트를 비동기식 함수로 변환하고 다음 fetch 호출 기다림
+
+```tsx
+export default async function Page() {
+  const data = await fetch("https://api.vercel.app/blog");
+  const posts = await data.json();
+
+  return (
+    <ul>
+      {posts.map((post) => (
+        <li key={post.id}>{post.title}</li>
+      ))}
+    </ul>
+  );
+}
+```
+
+### 알아두면 좋은 정보
+
+- fetch 응답은 기본적으로 캐시되지 않음
+- Next.js는 라우팅 페이지를 미리 렌더링하며, 성능 향상을 위해 렌더링 결과를 캐시O
+- 동적 렌더링을 사용하려면 fetch에 { cache: 'no-store' } 옵션을 지정
+- 개발 중에는 가시성과 디버깅을 위해 fetch 호출을 기록O
+  Next.js 15.1 이후부터는 서버 컴포넌트에서 await 없이 fetch를 사용O
+
+* ORM 또는 데이터베이스 사용
+
+- 서버 컴포넌트는 서버에서 렌더링되므로 ORM이나 데이터베이스 클라이언트를 사용해 안전하게 데이터베이스 쿼리를 실행할 수 있다
+- 컴포넌트를 async 함수로 선언하고, 쿼리 결과를 기다리면 된다
+
+```tsx
+import { db, posts } from "@/lib/db";
+
+export default async function Page() {
+  const allPosts = await db.select().from(posts);
+
+  return (
+    <ul>
+      {allPosts.map((post) => (
+        <li key={post.id}>{post.title}</li>
+      ))}
+    </ul>
+  );
+}
+```
+
+\*ORM(Object-Relational Mapping)\*\*은 객체 지향 프로그래밍 언어와 관계형 데이터베이스 사이의 데이터를 자동으로 변환해 주는 기술
+
+1-2. 클라이언트 컴포넌트
+클라이언트 컴포넌트에서 데이터를 가져오는 방법은 크게 두 가지입니다.
+
+1. React의 use 훅을 사용합니다.
+2. SWR이나 React Query 같은 데이터 통신 라이브러리를 사용합니다.
+3. use 훅으로 데이터 스트리밍
+   서버 컴포넌트에서 데이터를 먼저 가져온 뒤, 그 결과인 Promise를 클라이언트 컴포넌트에 props로 전달할 수 있습니다. 서버 컴포넌트는 async 함수로 선언할 수 있어 await fetch()를 사용할 수 있지만, 클라이언트 컴포넌트는 async 함수가 될 수 없으므로 렌더링 중 직접 fetch할 수 없습니다.
+
+클라이언트 컴포넌트에서는 전달받은 Promise를 use 훅으로 읽어 데이터를 표시합니다.
+
 # 11주차
 
 ## Context provider 실습 코드 설명
