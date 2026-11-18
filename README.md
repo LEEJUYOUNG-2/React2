@@ -1,9 +1,184 @@
 # 202230140 이주영
 
+# 12주차
+
+## 외부(서드파티) component
+
+- 클라이언트 전용 기능에 의존하는 외부 컴포넌트는 클라이언트 컴포넌트 안에서 사용하면 예상대로 동작
+
+- acme-carousel 패키지의 <Carousel />은 useState를 사용 - 자체적으로 "use client" 지시문은 포함X
+  이 컴포넌트를 클라이언트 컴포넌트에서 불러와 사용
+
+```tsx
+"use client";
+
+import { useState } from "react";
+import { Carousel } from "acme-carousel";
+
+export default function Gallery() {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <div>
+      <button onClick={() => setIsOpen(true)}>View pictures</button>
+      {/* Works, since Carousel is used within a Client Component */}
+      {isOpen && <Carousel />}
+    </div>
+  );
+}
+```
+
+- server component 내에서 직접 실행시 오류
+  <Carousel />이 클라이언트 전용 기능을 사용하지만, Next.js가 이를 알지 못하면 서버 컴포넌트에서 렌더링할 때 문제가 발생
+
+* 이 문제를 해결하려면 외부 컴포넌트를 별도의 클라이언트 컴포넌트로 감싸면 됨 - 서버 컴포넌트에서 감싼 컴포넌트를 불러와 사용O
+
+```tsx
+"use client";
+
+import { Carousel } from "acme-carousel";
+
+export default Carousel;
+```
+
+```tsx
+import Carousel from "./carousel";
+
+export default function Page() {
+  return (
+    <div>
+      <p>View pictures</p>
+      {/* Works, since Carousel is a Client Component */}
+      <Carousel />
+    </div>
+  );
+}
+```
+
 # 11주차
 
+## Context provider 실습 코드 설명
 
+### Context 생성 코드 설명 (theme-provider.tsx) – client 컴포넌트
 
+- context를 사용하면 props를 사용하지 않고도 전역적으로 사용할 theme, 언어 설정, 로그인 정보 등을 하위 컴포넌트에 전달할 수 있음
+
+- createContext()는 React 컴포넌트 트리 전체에 값을 공유할 수 있도록 하는 역할을 함
+
+- createContext(...)로 Context 객체를 생성하여, Theme state를 공유 line5 ~
+
+```tsx
+5 export const ThemeContext = createContext<{
+6  theme: "light" | "drak";
+7  toggleTheme: () => void;
+}>;
+```
+
+- <{...}> 부분은 타입 부분 - line6, 7
+
+* theme: 'light' 또는 'dark' 중 하나
+* toggleTheme: 아무 인자도 받지 않고, 반환값도 없는 함수라는 것을 의미
+
+* 초기값(default value)은 provider가 없을 때 사용할 fallback value. line9, 10
+  - React에서는 createContext()를 호출할 때 기본값이 반드시 있어야 함
+  - 보통은 실제 동작하지 않는 빈 함수(() => {})를 기본으로 넣어둔다
+  - 실제 동작은 ThemeProvider 컴포넌트에서 설정하게 된다
+  - theme: 'light', toggleTheme: () => {}
+
+```tsx
+8 }>({
+9  theme: 'light',
+10  toggleTheme: ()=> { },
+11 })
+```
+
+- ThemeProvider 컴포넌트 정의 line 13~
+
+- useState theme 상태 관리 line 18
+  : line6 에서도 나왔던 light | dark = TypeScript의 유니온타입 - 초기값 = light
+
+```tsx
+const [theme, setTheme] = useState<"light" | "dark">("light");
+```
+
+TypeScript의 유니온 타입
+
+- |(파이프)로 여로 타입 연결 - 이 값은 각각의 타입 중 하나가 될 수 있다 지정
+- 코드에서 문자열 리터럴 유니온 타입 경우 state 값으로 light or dark만 설정할수 있어 코드 자동완성, 타입 안정성 향상
+
+* useEffect Hook 사용 - 테마(Theme)를 HTML 문서 전체에 적용(전형적 패턴) line 20~24
+* useEffect Hook = 컴포넌트가 렌더링된 후 부수효과를 실행하기 위한 함수
+
+```tsx
+20 useEffect(() => {
+21  if (typeof window !== "undefined") {
+22    document.documentElement.dataset.theme = theme;
+23  }
+24 }, [theme]);
+```
+
+- if문 조건절 = 현재 실행 환경 브라우저인지 확인 line 21
+
+* 서버 사이드 렌더링(SSR) 단계 - windoe 객체X
+* 서버에서 window 참조 - 오류 (ReferenceError: window is not defined) - typeof window !=='undefined' 는 클라이언트(브라우저) 환경일 때만 실행하라
+
+* line22는 다음과 같은 의미
+
+* `document.documentElement`는 HTML 문서의 `<html>` 요소를 가리킴
+* `.dataset.theme`은 `<html>` 태그에 `data-theme` 속성을 설정하는 코드
+  ➜ 만일 theme state 값이 `"dark"`라면 다음과 같이 HTML을 반환
+  `<html data-theme="dark">`
+
+* useEffect의 두 번째 인자 `[theme]`는 의존성 배열(dependency array) line24
+
+- `theme` 값이 변경될 때마다 `useEffect` 안의 코드가 다시 실행
+  ➜ 테마가 바뀔 때마다 HTML의 `data-theme` 속성도 업데이트
+
+* 이 방법을 사용 - CSS에서 속성을 조건으로 스타일을 다르게 지정O
+
+```tsx
+20 useEffect(() => {
+21  if (typeof window !== "undefined") {
+22    document.documentElement.dataset.theme = theme;
+23  }
+24 }, [theme]);
+```
+
+```css
+html[data-theme="light"] {
+  background-color: white;
+  color: black;
+}
+
+html[data-theme="dark"] {
+  background-color: black;
+  color: white;
+}
+```
+
+- theme state를 3항 연산자를 사용, 토글 setTheme 함수를 이용 - toggleTheme에 저장 line26
+
+```tsx
+26 const toggleTheme - () => {setTheme((t) =>
+27 (t==='dark' ? 'light' : 'dark'))}
+28 return (
+29  <ThemeContext.Provider value={{ theme, toggleTheme}}>
+30  {children}
+31  </ThemeContext.Provider>
+)
+}
+```
+
+## ThemeContext.Provider = ?
+
+- `createContext` 함수를 호출하면, React는 Context 객체 하나를 만들어줌
+- 객체 안에는 여러 가지 속성이 있음 대표적인 것 - 두 가지
+- `ThemeContext.Provider`, `ThemeContext.Consumer`
+- `Provider`는 `createContext()`를 호출 - 자동으로 생성 React 컴포넌트 line28
+
+* 따라서 ThemeContext.Provider 컴포넌트에 현재 theme state와 함께 toggleTheme 함수도 함께 props로 전달 line28
+
+➜ 하위 컴포넌트에서는 현재 theme state를 알 수 없기 때문 - 버튼 쪽으로 toggleTheme 함수와 함께 theme state를 전달하는 것
 
 # 8주차
 
