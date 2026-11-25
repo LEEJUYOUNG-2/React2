@@ -16,6 +16,8 @@ export defulat function Blog2Page() {
     if(error) return <div>Error: {error.message}</div>
 
     return (
+        <>
+        <h1>Blog2 Page</h1>
         <Suspense fallback={<div>Loading...</div>}>
             <ul>
                 {data?.map((photo) => (
@@ -23,5 +25,6 @@ export defulat function Blog2Page() {
                 ))}
             </ul>
         </Suspense>
+        </>
     )
 }
