@@ -1,5 +1,128 @@
 # 202230140 이주영
 
+# 13주차
+
+- Fetch의 이해
+
+* 실습한 코드에서 fetch(url).then((res) => res.json())이라는 부분이 있음
+* fetch(url)
+* fetch() 함수는 브라우저의 Fetch API로, HTTP 요청을 보낼 때 사용
+* 기본적으로 GET 방식으로 요청을 수행
+* 첫 번째 인자로 요청할 URL, 두 번째 인자로 요청 옵션을 전달
+* 옵션에는 method, headers, body 등이 있음 - MDN
+* Promise<Response> 객체를 반환
+* 응답이 도착하면 then()을 통해 결과를 처리
+* 응답이 성공적으로 도착하면 Promise가 이행(resolve)
+* 네트워크 요청이 완료되면 resolve()를 통해 결과를 전달
+* HTTP 상태 코드가 4xx/5xx 이어도 Promise는 reject(오류)되지 않음
+* 네트워크 에러(통신 오류)가 아니라면 무조건 resolve
+* 404, 500 등 오류를 처리하려면 예외처리 별도 필요
+
+```tsx
+function getPosts() {
+ return fetch (https://jsonplaceholder.typicode.com/posts')then((res) =>
+ res.json()
+ )
+}
+```
+
+- 예제
+
+```tsx
+const promise = new Promise(resolve, reject) => {
+  //비동기 작업 수행
+  if(성공){
+    resolve("성공 결과")
+  }else {
+    reject("에러메시지")
+  }
+}
+```
+
+- resolve()의 기능
+- resolve(value) = Promise 상태를 fulfilled(이행됨)
+
+* 혼동 부분
+* resolve Promise 안에서 자동으로 전달되는 함수
+* 직접 정의 x new Promise 내부 callback의 첫 번째 매개변수
+
+```tsx
+//(X)
+const resolve = () => ()
+//(O)
+new Promise ((resoeve.reject)) => (..);
+```
+
+- 이미 존재하는 Promise를 resolve
+- 경우에 따라 새 Promise를 만들지 않고 이미 존재하는 값을 즉시 이행된 Promise로 감싸고 싶을 때
+
+```tsx
+Promise.resolve("이미 완료된 길").then(console.log); // 출력 - 이미 완료된 길
+```
+
+- new Promise((resolve)) => resolve("이미 완료된 값) - 같은 의미
+
+#### .then((res) => …)
+
+- fetch()가 반환한 Promise 객체에는 .then() 메서드가 있음
+- Promise가 이행(resolve)되면 .then()의 콜백 함수가 실행
+- 여기서 res는 서버에서 반환된 응답 객체
+- 응답 객체에는 HTTP 응답 전체를 담은 status, headers, body 등이 있음
+- res.ok는 상태 코드가 200~299 범위인지 Boolean 값으로 알려줌
+- res.status는 상태 코드를 숫자로 알려줌 예: 200, 404
+- fetch()는 HTTP 오류 응답을 자동으로 예외 처리하지 않으므로, 오류 여부를 직접 확인해야 함
+
+```tsx
+function getPosts() {
+  return fetch("https://jsonplaceholder.typicode.com/posts").then((res) => {
+    return res.json();
+  });
+}
+```
+
+Suspense Component란 무엇인가?
+
+- 비동기 작업 중 일부를 임시 UI(fallback)로 보여주어 사용자 경험을 향상시키는 React 기능입니다. (예: 데이터 로딩, 컴포넌트 동적 임포트)
+  Suspense의 핵심 기능
+- 비동기 작업이 완료될 때까지 해당 컴포넌트 트리 렌더링을 일시 중지합니다.
+- 작업이 완료되면 실제 UI로 자동 전환합니다.
+- 비동기 로딩 중 보여 줄 fallback UI(로딩 인디케이터 등)를 지정할 수 있습니다.
+- import하여 사용합니다. import { Suspense } from 'react'
+- Suspense 내부에 여러 개의 컴포넌트가 있을 경우, 내부 컴포넌트 중 하나라도 로딩 중이면 fallback UI가 표시되고, 모든 작업이 완료되면 실제 UI가 노출됩니다.
+- 이 기능을 활용하면 여러 비동기 컴포넌트를 독립적으로 대기하거나, 병렬 로딩 상태를 효과적으로 관리할 수 있습니다.
+
+### Promise<...>란 무엇인가?
+
+- Next.js 15.1부터 주요 내부 API들이 비동기(Promise 기반) 구조로 변경되었습니다.
+- 내부 API(예: `params`, `searchParams`, `headers`, `cookies`)는 즉시 사용할 수 있는 값이 아니라, 비동기적으로 처리된 뒤 Promise를 반환합니다.
+- 즉, `Promise<...>`는 비동기 연산의 결과를 나타내는 객체 타입입니다. 연산이 즉시 완료되지 않고, 미래의 어느 시점에 결과가 결정될 수 있음을 표현합니다.
+- `Promise<{ id: string }>`는 미래에 `{ id: string }` 객체를 반환한다는 뜻입니다.
+- 서버 컴포넌트에서 Promise를 전달받으면, 클라이언트 컴포넌트에서는 `use` Hook을 사용해 개별 데이터에 접근할 수 있습니다.
+- Next.js 15.1 이전과 이후의 변화입니다.
+
+- Next.js 15.1부터 주요 내부 API들이 비동기(Promise 기반) 구조로 변경
+- 내부 API(예: params, searchParams, headers, cookies)는 즉시 사용할 수 있는 값이 아니라, 비동기적으로 처리된 뒤 Promise를 반환
+- 즉, Promise<...>는 비동기 연산의 결과를 나타내는 객체 타입 - 연산이 즉시 완료되지 않고, 미래의 어느 시점에 결과가 결정될 수 있음을 표현
+- Promise<{ id: string }>는 미래에 { id: string } 객체를 반환한다
+- 서버 컴포넌트에서 Promise를 전달받으면, 클라이언트 컴포넌트에서는 use Hook을 사용해 개별 데이터에 접근할 수 있음
+- Next.js 15.1 이전과 이후의 변화
+  | 항목 | 15.0 이하 | 15.1 이상 |
+  | --------- | ----------------------- | -------------------------- |
+  | 구조 | `{ id: string }` | `Promise<{ id: string }>` |
+  | 사용 방식 | `params.id`로 바로 접근 | `await params` 사용 필요 |
+  | 특징 | 동기 객체 | 비동기 객체 (`await` 필수) |
+
+서버 컴포넌트에서 getPosts() 함수를 사용하려면 (2)
+데이터의 전체적인 흐름
+
+1. blog에 접속하면 getPosts 라이브러리를 호출하여 fetch 정보를 전달합니다.
+2. getPosts는 전달받은 정보를 이용해 fetch 데이터를 가져온 뒤, JSON 형태로 blog에 반환합니다.
+3. blog는 getPosts로부터 받은 데이터를 Posts 컴포넌트에 props로 전달합니다.
+4. blog는 Posts 컴포넌트가 데이터를 받을 때까지 Suspense로 fallback UI를 실행합니다.
+5. Posts 컴포넌트는 받은 props를 use Hook으로 사용하여 데이터를 저장합니다.
+6. 저장된 데이터는 map 함수를 사용하여 list를 만들고, 그 결과를 blog로 반환합니다.
+7. list를 받으면 blog는 fallback UI 실행을 중지하고 즉시 list를 렌더링합니다.
+
 # 12주차
 
 ## 외부(서드파티) component
@@ -151,13 +274,14 @@ export default async function Page() {
 
 \*ORM(Object-Relational Mapping)\*\*은 객체 지향 프로그래밍 언어와 관계형 데이터베이스 사이의 데이터를 자동으로 변환해 주는 기술
 
-1-2. 클라이언트 컴포넌트
-클라이언트 컴포넌트에서 데이터를 가져오는 방법은 크게 두 가지입니다.
+### 클라이언트 컴포넌트
 
-1. React의 use 훅을 사용합니다.
+- 클라이언트 컴포넌트에서 데이터를 가져오는 방법은 크게 두 가지
+
+1. React의 use 훅을 사용
 2. SWR이나 React Query 같은 데이터 통신 라이브러리를 사용합니다.
 3. use 훅으로 데이터 스트리밍
-   서버 컴포넌트에서 데이터를 먼저 가져온 뒤, 그 결과인 Promise를 클라이언트 컴포넌트에 props로 전달할 수 있습니다. 서버 컴포넌트는 async 함수로 선언할 수 있어 await fetch()를 사용할 수 있지만, 클라이언트 컴포넌트는 async 함수가 될 수 없으므로 렌더링 중 직접 fetch할 수 없습니다.
+   서버 컴포넌트에서 데이터를 먼저 가져온 뒤, 그 결과인 Promise를 클라이언트 컴포넌트에 props로 전달할 수 음 서버 컴포넌트는 async 함수로 선언할 수 있어 await fetch()를 사용할 수 있지만, 클라이언트 컴포넌트는 async 함수가 될 수 없으므로 렌더링 중 직접 fetch할 수 없음
 
 클라이언트 컴포넌트에서는 전달받은 Promise를 use 훅으로 읽어 데이터를 표시합니다.
 
